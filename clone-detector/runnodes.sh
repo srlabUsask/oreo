@@ -19,6 +19,7 @@ rm -f "$rootPATH/nodes_completed.txt"
 
 for i in $(seq 1 1 $num_nodes)
 do
+    echo "$rootPATH/" "$rootPATH/NODE_$i/sourcerer-cc.properties" "$rootPATH/NODE_$i/log4j2.xml" $rootPATH/dist/indexbased.SearchManager.jar $mode $threshold
     java -Dproperties.rootDir="$rootPATH/" -Dproperties.location="$rootPATH/NODE_$i/sourcerer-cc.properties" -Dlog4j.configurationFile="$rootPATH/NODE_$i/log4j2.xml" -Xms10g -Xmx10g -XX:+UseCompressedOops -jar $rootPATH/dist/indexbased.SearchManager.jar $mode $threshold &
     PIDS+="$! "
 done

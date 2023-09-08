@@ -133,7 +133,7 @@ public class CandidateProcessor implements IListener, Runnable {
         features.add(candiadteBlock.getMethodIdentifier());
         CloneLabel cp = new CloneLabel((int) queryBlock.parentId, queryBlock.id, (int) candiadteBlock.parentId,
                 candiadteBlock.id);
-        if (SearchManager.properties.getBoolean("IS_TRAIN_MODE")) {
+        if (SearchManager.getBoolean(SearchManager.properties.getProperty("IS_TRAIN_MODE"))) {
             if (SearchManager.clonePairs.contains(cp)) {
                 features.add("1");
             } else {
@@ -165,7 +165,7 @@ public class CandidateProcessor implements IListener, Runnable {
         features.add(candiadteBlock.getMethodIdentifier());
         CloneLabel_CW cp = new CloneLabel_CW(queryBlock.projectName+"/"+queryBlock.fileName,queryBlock.startLine,queryBlock.endLine,
                 candiadteBlock.projectName+"/"+candiadteBlock.fileName, candiadteBlock.startLine, candiadteBlock.endLine);
-        if (SearchManager.properties.getBoolean("IS_TRAIN_MODE")) {
+        if (SearchManager.getBoolean(SearchManager.properties.getProperty("IS_TRAIN_MODE"))) {
             if (SearchManager.clonePairs.contains(cp)) {
                 features.add("1");
             } else {
@@ -231,7 +231,7 @@ public class CandidateProcessor implements IListener, Runnable {
                 if (simInfo.totalActionTokenSimilarity >= minPosibleSimilarity) {
                     logger.debug("similarity is: " + simInfo.totalActionTokenSimilarity);
                     String type = "3.3";
-                    if (SearchManager.properties.getBoolean("IS_TRAIN_MODE")) {
+                    if (SearchManager.getBoolean(SearchManager.properties.getProperty("IS_TRAIN_MODE"))) {
                         if (candidateBlock.metriHash.equals(this.qc.queryBlock.metriHash)) {
                             // this is type 2
                             // ignore for training.

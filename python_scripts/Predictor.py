@@ -16,7 +16,7 @@ import shutil
 
 class Predictor(object):
 
-    def __init__(self, port):
+    def __init__(self, port, outdir, candidatedir):
         self.colNames = ["block1", "block2", "isClone", "COMP1","COMP2", "NOS1", "NOS2", "HVOC1", "HVOC2", "HEFF1", "HEFF2",
                          "CREF1", "CREF2", "XMET1", "XMET2",  "LMET1", "LMET2",
                          "NOA1", "NOA2", "HDIF1", "HDIF2", "VDEC1", "VDEC2", "EXCT1", "EXCT2", "EXCR1", "EXCR2", "CAST1", "CAST2",
@@ -29,7 +29,7 @@ class Predictor(object):
         self.num_candidates_32 = 0
         self.array_31 = []
         self.array_32 = []
-        self.output_dir = os.path.join(os.path.dirname(__file__), '../results/predictions/')
+        self.output_dir = outdir
         #print( os.path.join(os.path.dirname(__file__), '../ml_model/oreo_model_fse.h5'))
         self.modelfilename_type31 = os.path.join(os.path.dirname(__file__), '../ml_model/oreo_model_fse.h5')
         self.loadModel()
@@ -46,7 +46,7 @@ class Predictor(object):
         self.files_processed = set()
         self.files_to_consider = []
         self.candidates_dir = "{directory}/{port}".format(
-            directory=os.path.join(os.path.dirname(__file__), '../results/candidates/'),
+            directory=candidatesdir,
             port=self.socketPort)
         self.candidateListFile = "{directory}/candidatesList.txt".format(directory=self.candidates_dir)
         self.FINISHED = 0
@@ -138,8 +138,8 @@ class Predictor(object):
 
     def start(self):
         data = ""
-        self.chunkcounter = 0;
-        self.linecounter = 0;
+        self.chunkcounter = 0
+        self.linecounter = 0
         breakOuterLoop = False
         while True:
             if breakOuterLoop:
@@ -194,7 +194,7 @@ class Predictor(object):
         return self.CONTINUE
 
     def startJob(self):
-        self.linecounter = 0;
+        self.linecounter = 0
         status = self.CONTINUE
         self.processed_file_counter = 0
         while status == self.CONTINUE:
@@ -207,9 +207,11 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # load model
-    if len(sys.argv) == 2:
+    if len(sys.argv) >= 2:
         port = int(sys.argv[1])
-        predictor = Predictor(port)
+        outdir = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(__file__), '../results/predictions/')
+        candidatesdir = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(__file__), '../results/candidates/')
+        predictor = Predictor(port, outdir, candidatesdir)
         # predictor.connect_socket()
         predictor.startJob()
         end_time = time.time()

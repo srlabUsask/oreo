@@ -42,7 +42,7 @@ public class TokensFileReader {
             logger.debug("queries processed: " + SearchManager.queriesProcessed + ", ProgressMonitor: "
                     + this.progressMonitor);
             if (this.progressMonitor.queriesProcessed
-                    % SearchManager.properties.getInt("LOG_PROCESSED_LINENUMBER_AFTER_X_LINES") == 0) {
+                    % SearchManager.getInt(SearchManager.properties.getProperty("LOG_PROCESSED_LINENUMBER_AFTER_X_LINES")) == 0) {
                 logger.info("Search Progress" + this.progressMonitor.toString());
             }
         }

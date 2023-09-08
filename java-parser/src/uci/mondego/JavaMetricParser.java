@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Paths;
 
 public class JavaMetricParser {
     public String outputDirPath;
@@ -27,7 +28,9 @@ public class JavaMetricParser {
         this.tokensFileName = "scc_input.file";
         JavaMetricParser.prefix = this.getBaseName(inputFilePath);
         JavaMetricParser.fileIdPrefix = JavaMetricParser.prefix;// "1";
-        this.outputDirPath = JavaMetricParser.prefix + "_metric_output";
+        
+        File outFile = new File(Paths.get(inputFilePath).getParent().getParent().toString(), JavaMetricParser.prefix + "_metric_output");
+        this.outputDirPath = outFile.getPath();
         File outDir = new File(this.outputDirPath);
         if (!outDir.exists()) {
             outDir.mkdirs();

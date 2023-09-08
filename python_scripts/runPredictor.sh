@@ -8,5 +8,5 @@ echo "*****************************************************"
 
 for i in $(seq $start_port 1 $end_port)
 do
-  python Predictor.py $i > out_$i &
+  python Predictor.py $i "$@" > out_$i &
 done

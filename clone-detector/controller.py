@@ -29,16 +29,20 @@ class ScriptController(object):
     STATE_EXECUTE_2 = 4
     STATE_SEARCH = 5
 
-    def __init__(self, params):
+    def __init__(self, params, outdir):
         self.params = {}
         self.params.update(params)
+        self.outdir = outdir
         self.script_meta_file_name = self.full_file_path("scriptinator_metadata.scc")
         self.current_state = ScriptController.STATE_EXECUTE_1  # default state
         self.previous_run_state = self.load_previous_state()
-        self.configFilename = self.full_file_path("sourcerer-cc.properties")
+        self.configFilename = self.full_this_path("sourcerer-cc.properties")
+
+    def full_this_path(self, string):
+        return os.path.join(os.path.dirname(os.path.realpath(__file__)), string)
 
     def full_file_path(self, string):
-        return os.path.join(os.path.dirname(os.path.realpath(__file__)), string)
+        return os.path.join(self.outdir, string)
 
     def full_script_path(self, string, param=""):
         if len(param) == 0:
@@ -167,8 +171,8 @@ class ScriptController(object):
 
     def run_command(self, cmd, outFile, errFile):
         print("running new command {}".format(" ".join(cmd)))
-        with open(outFile, "w") as fo, \
-             open(errFile, "w") as fe:
+        with open(outFile, "a+") as fo, \
+             open(errFile, "a+") as fe:
             p = subprocess.Popen(cmd, stdout=fo, stderr=fe, universal_newlines=True)
             p.communicate()
         return p.returncode
@@ -176,7 +180,8 @@ class ScriptController(object):
     def assignShardsToNodes(self):
         nodes = int(self.params["num_nodes_search"])
         totalShards = 0
-        with codecs.open(self.configFilename, "r") as f:
+        cname = self.configFilename
+        with codecs.open(cname, "r") as f:
             for line in f:
                 line = line.strip()
                 if "LEVEL_1_SHARD_MAX_NUM_TOKENS" in line:
@@ -206,7 +211,7 @@ class ScriptController(object):
                 print("{n}:{s}".format(n=node, s=",".join(shards)))
                 
             for nodeId in range(1, nodes + 1):
-                configFilePath = self.full_file_path("NODE_{id}/sourcerer-cc.properties".format(id=nodeId))
+                configFilePath = self.full_this_path("NODE_{id}/sourcerer-cc.properties".format(id=nodeId))
                 searchShardString = ",".join(nodesToShardIdMap[nodeId])
                 newSearchShardsString = "SEARCH_SHARDS={s}\n".format(s=searchShardString)
                 content = []
@@ -224,8 +229,10 @@ if __name__ == '__main__':
     numnodes = 2
     if len(sys.argv) > 1:
         numnodes = int(sys.argv[1])
+    
     print("search will be carried out with {num} nodes".format(num=numnodes))
     params = {"num_nodes_search": numnodes}
 
-    controller = ScriptController(params)
+    outdir = sys.argv[2] if len(sys.argv) > 2 else os.path.dirname(os.path.realpath(__file__))
+    controller = ScriptController(params, outdir)
     controller.execute()

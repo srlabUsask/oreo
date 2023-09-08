@@ -39,7 +39,7 @@ public class SocketWriter {
             os = socket.getOutputStream();
             pwrite = new BufferedWriter(
                     new OutputStreamWriter(os, StandardCharsets.UTF_8),
-                    SearchManager.properties.getInt("SOCKET_BUFFER"));
+                    SearchManager.getInt(SearchManager.properties.getProperty("SOCKET_BUFFER")));
             // pwrite = new PrintWriter(new
             // OutputStreamWriter(os,StandardCharsets.UTF_8), false);
 

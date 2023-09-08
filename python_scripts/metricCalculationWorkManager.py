@@ -4,6 +4,8 @@ import shutil
 import zipfile
 import sys
 
+thispath = os.path.abspath(os.path.dirname(__file__))
+
 def full_file_path(string):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), string)
 
@@ -53,7 +55,8 @@ if __name__ == '__main__':
         type_input=sys.argv[2]
         main_dir=sys.argv[3]
     else:
-        print("Please provide all arguments")
+        print("Error: Please provide all arguments")
+        quit()
 
     if(type_input=='z' or type_input=='d'):
         #main_dir="/scratch/mondego/local/farima/new_oreo/recall_related/recall_dataset"
@@ -70,12 +73,14 @@ if __name__ == '__main__':
         num_dir_per_process=len(subdirs)//num_process
         num_last_file=num_dir_per_process+(len(subdirs)%num_process)
 
-        if os.path.exists("output"):
-            shutil.rmtree('output')
-        os.makedirs("output")
+        outpath = sys.argv[4] if len(sys.argv) > 4 else ""
+        outputdir = os.path.join(outpath, "output")
+        if os.path.exists(outpath):
+            shutil.rmtree(outpath)
+        os.makedirs(outputdir)
     
         for i in range(num_process):
-            file = open("output/" + str(i + 1) + ".txt", "w")
+            file = open(f"{outputdir}/" + str(i + 1) + ".txt", "w")
             numWritten=0
             for j in range((i*num_dir_per_process),len(subdirs)):
                 file.write(subdirs[j]+"\n")
@@ -83,14 +88,25 @@ if __name__ == '__main__':
                 if(numWritten==(num_dir_per_process) and i!=(num_process-1)):
                     break
             file.close()
-        for file in os.listdir("output/"):
+        for file in os.listdir(f"{outputdir}/"):
             mode="zip"
             if type_input=="z":
                 mode="zip"
             elif type_input=="d":
                 mode="dir"
-            command = " java -Xms4g -Xmx4g -jar ../java-parser/dist/metricCalculator.jar {filename} {mode}".format(
-                filename=full_file_path("output/"+file),mode=mode)
-            command_params = command.split()
-            run_command(
-                command_params, full_file_path("metric.out"), full_file_path("metric.err"))
+            
+            # jarpath = os.path.abspath(os.path.join(thispath, "../java-parser/dist/metricCalculator.jar"))
+            # command = " java -Xms4g -Xmx4g -jar {jarpath} {filename} {mode}".format(jarpath=jarpath,
+            #     filename=f"{outputdir}/"+file,mode=mode)
+            
+            oldcwd = os.getcwd() if os.getcwd() !=  thispath else None
+            try:
+                if oldcwd: os.chdir(thispath)
+
+                command = " java -Xms4g -Xmx4g -jar ../java-parser/dist/metricCalculator.jar {filename} {mode}".format(
+                    filename=f"{outputdir}/"+file,mode=mode)
+                command_params = command.split()
+                run_command(
+                    command_params, f"{outpath}/metric.out", f"{outpath}/metric.err")
+            finally:
+                if oldcwd: os.chdir(oldcwd)

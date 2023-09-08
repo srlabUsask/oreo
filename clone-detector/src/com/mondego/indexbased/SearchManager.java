@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -105,7 +106,14 @@ public class SearchManager {
     public static ThreadedChannel<Bag> bagsToForwardIndexQueue;
     public static SearchManager theInstance;
     public static List<IndexWriter> indexerWriters;
-    public static EProperties properties = new EProperties();
+    public static Properties properties = new Properties(); // new EProperties(); MHn
+
+    public static int getInt(String str) {
+        return Integer.parseInt(str);
+    }
+    public static boolean getBoolean(String str) {
+        return Boolean.parseBoolean(str);
+    }
 
     public static Object lock = new Object();
     private int qlq_thread_count;
@@ -488,8 +496,8 @@ public class SearchManager {
                  * SearchManager.socketWriters.values()) {
                  * socketWriter.closeSocket(); }
                  */
-                for (int i = SearchManager.properties.getInt("START_PORT"); i <= SearchManager.properties
-                        .getInt("END_PORT"); i++) {
+                for (int i = SearchManager.getInt(SearchManager.properties.getProperty("START_PORT")); i <= SearchManager.getInt(SearchManager.properties
+                        .getProperty("END_PORT")); i++) {
 
                     if (SearchManager.clientWiseCurrentCandidateFileNum.containsKey(i)) {
                         // close the candiadte pair file
@@ -497,7 +505,7 @@ public class SearchManager {
                         Util.writeToFile(SearchManager.candidateWriters.get(key), "FINISHED_JOB", true);
                         Util.closeOutputFile(SearchManager.candidateWriters.get(key));
                         if (!SearchManager.clinetWiseCandidateListFile.containsKey(i)) {
-                            String candidateListFilePath = SearchManager.properties.getString("CANDIDATES_DIR") + "/"
+                            String candidateListFilePath = SearchManager.properties.getProperty("CANDIDATES_DIR") + "/"
                                     + i + "/candidatesList.txt";
                             SearchManager.clinetWiseCandidateListFile.put(i, candidateListFilePath);
                         }
@@ -1063,7 +1071,7 @@ public class SearchManager {
          * "localhost"); socketWriter.openSocketForWriting();
          * SearchManager.socketWriters.put(key, socketWriter); }
          */
-        if (SearchManager.properties.getBoolean("IS_TRAIN_MODE")) {
+        if (SearchManager.getBoolean(SearchManager.properties.getProperty("IS_TRAIN_MODE"))) {
             theInstance.loadCloneLabels();
         }
 
@@ -1136,7 +1144,7 @@ public class SearchManager {
     }
 
     private void setupSearchers(Shard shard) {
-        this.max_index_size = SearchManager.properties.getInt("MAX_INDEX_SIZE");
+        this.max_index_size = SearchManager.getInt(SearchManager.properties.getProperty("MAX_INDEX_SIZE"));
         if (shard.subShards.size() > 0) {
             for (Shard subShard : shard.subShards) {
                 this.setupSearchers(subShard);
@@ -1196,8 +1204,8 @@ public class SearchManager {
         synchronized (theInstance) {
             String key = type+"_" + port + "_" + count;
             if (!SearchManager.candidateWriters.containsKey(key)) {
-                Util.createDirs(SearchManager.properties.getString("CANDIDATES_DIR") + "/" + port);
-                String filePath = SearchManager.properties.getString("CANDIDATES_DIR") + "/" + port + "/" + key
+                Util.createDirs(SearchManager.properties.getProperty("CANDIDATES_DIR") + "/" + port);
+                String filePath = SearchManager.properties.getProperty("CANDIDATES_DIR") + "/" + port + "/" + key
                         + ".txt";
                 SearchManager.candidateWriters.put(key, Util.openFile(filePath, false));
                 SearchManager.keyWiseCandidateFilePath.put(key, filePath);
@@ -1211,7 +1219,7 @@ public class SearchManager {
                     SearchManager.candidateWriters.remove(previousKey);
                     logger.debug("closed and removed writer for key:" + previousKey);
                     if (!SearchManager.clinetWiseCandidateListFile.containsKey(port)) {
-                        String candidateListFilePath = SearchManager.properties.getString("CANDIDATES_DIR") + "/" + port
+                        String candidateListFilePath = SearchManager.properties.getProperty("CANDIDATES_DIR") + "/" + port
                                 + "/candidatesList.txt";
                         SearchManager.clinetWiseCandidateListFile.put(port, candidateListFilePath);
                     }
